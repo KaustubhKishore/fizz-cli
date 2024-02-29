@@ -1,0 +1,23 @@
+apiVersion: fission.io/v1
+kind: HTTPTrigger
+metadata:
+  creationTimestamp: null
+  name: function1-route
+spec:
+  createingress: false
+  functionref:
+    functionweights: null
+    name: placeholder
+    type: name
+  host: ""
+  ingressconfig:
+    annotations: null
+    host: '*'
+    path: /placeholder
+    tls: ""
+  method: ""
+  methods:
+  - GET
+  - POST
+  prefix: ""
+  relativeurl: /placeholder
