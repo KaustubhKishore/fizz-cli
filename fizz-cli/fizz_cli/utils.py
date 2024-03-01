@@ -328,6 +328,39 @@ def rename_file(old_file_path, new_file_path):
     except Exception:
         return False
 
+def delete_function(function_name: str):
+    """
+    Deletes the function along with its associated files and configurations.
+
+    Parameters:
+        function_name (str): The name of the function to delete.
+
+    Returns:
+        bool: True if the function was successfully deleted, False otherwise.
+    """
+    try:
+        # Delete function YAML file
+        delete_file_if_exists(os.path.join(SPECS_DIR, f"function-{function_name}.yaml"))
+
+        # Delete route YAML file
+        delete_file_if_exists(os.path.join(SPECS_DIR, f"route-{function_name}.yaml"))
+
+        # Delete package YAML file
+        delete_file_if_exists(os.path.join(SPECS_DIR, f"package-{function_name}.yaml"))
+
+        # Delete function folder
+        shutil.rmtree(os.path.join(SPECS_DIR, function_name))
+
+        print(
+            f"[bold green]Function '{function_name}' and its associated files have been deleted successfully.[/bold green]"
+        )
+        return True
+    except Exception as e:
+        print(
+            f"[bold red]Error occurred while deleting function '{function_name}': {e}[/bold red]"
+        )
+        return False
+
 
 # Define Typer app
 app = typer.Typer()
@@ -375,6 +408,13 @@ def rename(function_name: str, new_name: str):
     rename_fn_in_specs(function_name, new_fn_name)
     print(f"[block green]Function renaming in specs done.[/block green]")
 
+
+@app.command()
+def delete(function_name: str):
+    """
+    Deletes an existing function and its associated files and configurations.
+    """
+    delete_function(function_name)
 
 @app.command()
 def i():

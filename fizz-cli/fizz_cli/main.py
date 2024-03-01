@@ -17,6 +17,7 @@ from .utils import (
     replace_route,
     save_yaml_file,
     update_shell_scripts,
+    delete_function
 )
 
 app = typer.Typer()
@@ -152,10 +153,11 @@ def i():
                     route_delete(function_name)
 
                 elif idx == 3:
-                    pass  # Add your logic here for renaming the function
-
-                elif idx == 4:
-                    pass  # Add your logic here for deleting the function
+                    deleted = delete_function(function_name)  # Call delete_function
+                    if deleted:
+                        print(f"[bold green]Function '{function_name}' deleted successfully.[/bold green]")
+                    else:
+                        print(f"[bold red]Failed to delete function '{function_name}'.[/bold red]")
 
             else:
                 print(
