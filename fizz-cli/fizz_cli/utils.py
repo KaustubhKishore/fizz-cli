@@ -415,6 +415,3 @@ def delete(function_name: str):
     Deletes an existing function and its associated files and configurations.
     """
     delete_function(function_name)
-
-if __name__ == "__main__":
-    app()
