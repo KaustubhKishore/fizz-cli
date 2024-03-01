@@ -122,31 +122,17 @@ def get_fn_route_path(fn_name: str):
 
 def delete_file_if_exists(file_path):
     try:
-        # Check if the file exists
         if os.path.exists(file_path):
-            # Delete the file
             os.remove(file_path)
             print(f"[bold green]The file {file_path} has been deleted.[/bold green]")
         else:
-            # The file does not exist, so do nothing
             print(f"[bold red]The file {file_path} does not exist.[/bold red]")
     except OSError as e:
         print(f"[bold red]Error: {e.strerror}, filename: {e.filename}[/bold red]")
 
 
 def rename_folder(current_fn, new_fn):
-    """
-    Renames a folder from current_folder_path to new_folder_path.
-
-    Parameters:
-        current_folder_path (str): The current path to the folder.
-        new_folder_path (str): The new path or new name for the folder.
-
-    Returns:
-        bool: True if the folder was successfully renamed, False otherwise.
-    """
     try:
-        # Rename the folder
         shutil.move(f"./{current_fn}", f"./{new_fn}")
         return True
     except OSError as e:
@@ -159,7 +145,7 @@ def update_shell_scripts(fn_name, new_fn_name):
         pushd_pattern = re.compile(rf"pushd {re.escape(fn_name)}\b")
         zip_pattern = re.compile(rf"\b{re.escape(fn_name)}.zip")
 
-        # Replace in .sh file
+
         with open(SH_FILE, "r") as file:
             sh_content = file.read()
         sh_content = pushd_pattern.sub(f"pushd {new_fn_name}", sh_content)
@@ -167,7 +153,7 @@ def update_shell_scripts(fn_name, new_fn_name):
         with open(SH_FILE, "w") as file:
             file.write(sh_content)
 
-        # Replace in .bat file
+
         with open(BAT_FILE, "r") as file:
             bat_content = file.read()
         bat_content = pushd_pattern.sub(f"pushd {new_fn_name}", bat_content)
@@ -260,27 +246,25 @@ def rename_fn_in_specs(fn_name, new_fn_name):
 
 def replace_build_cmd(fn_name):
     docs = []
-    # Load all documents from the YAML file
+
     with open(os.path.join(SPECS_DIR, f"package-{fn_name}.yaml"), "r") as file:
         docs = list(yaml.load_all(file, Loader=yaml.FullLoader))
 
-    # Check if there's more than one document and the second document contains 'spec'
+
     if len(docs) > 1 and "spec" in docs[1]:
         config = docs[1]
 
-        # Modify 'buildcmd' in the second document
+
         if "buildcmd" in config["spec"]:
             del config["spec"]["buildcmd"]
 
-        # Add or modify the 'initContainers' entry in the second document
+
         config["spec"]["initContainers"] = [
             {"command": ["chmod +x build.sh", "./build.sh"]}
         ]
 
-        # Replace the modified document in the list
         docs[1] = config
 
-    # Write the modified list of documents back to the file
     save_yaml_file_multi("package", fn_name, docs)
 
 
@@ -329,26 +313,13 @@ def rename_file(old_file_path, new_file_path):
         return False
 
 def delete_function(function_name: str):
-    """
-    Deletes the function along with its associated files and configurations.
-
-    Parameters:
-        function_name (str): The name of the function to delete.
-
-    Returns:
-        bool: True if the function was successfully deleted, False otherwise.
-    """
     try:
-        # Delete function YAML file
         delete_file_if_exists(os.path.join(SPECS_DIR, f"function-{function_name}.yaml"))
 
-        # Delete route YAML file
         delete_file_if_exists(os.path.join(SPECS_DIR, f"route-{function_name}.yaml"))
 
-        # Delete package YAML file
         delete_file_if_exists(os.path.join(SPECS_DIR, f"package-{function_name}.yaml"))
 
-        # Delete function folder
         shutil.rmtree(os.path.join(SPECS_DIR, function_name))
 
         print(
@@ -376,9 +347,7 @@ def new(function_name: str):
 
 @app.command()
 def rename(function_name: str, new_name: str):
-    """
-    Renames an existing function to a new name.
-    """
+
     typer.confirm(
         "Modify folder name? NOTE: bash/bat scripts will also be modified.",
         default=True,
@@ -411,7 +380,4 @@ def rename(function_name: str, new_name: str):
 
 @app.command()
 def delete(function_name: str):
-    """
-    Deletes an existing function and its associated files and configurations.
-    """
     delete_function(function_name)

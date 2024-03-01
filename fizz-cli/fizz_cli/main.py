@@ -33,18 +33,14 @@ app.add_typer(fn_app, name="fn")
 @app.command()
 @fn_app.command()
 def new(function_name: str):
-    """
-    Creates a new function with the given name.
-    """
+
     print(f"Creating new function: {function_name} \n")
 
 
 @app.command()
 @fn_app.command()
 def rename(function_name: str, new_name: str):
-    """
-    Renames an existing function to a new name.
-    """
+
     typer.confirm(
         "Modify folder name? NOTE: bash/bat scripts will also be modified.",
         default=True,
@@ -77,9 +73,7 @@ def rename(function_name: str, new_name: str):
 
 @route_app.command("rename")
 def route_rename(function_name: str, new_route_name: str):
-    """
-    Renames a route associated with a function to a new route name.
-    """
+
     _, data = read_yaml_file("route", function_name)
     data = replace_route(data, new_route_name)
     save_yaml_file("route", function_name, data)
@@ -91,9 +85,7 @@ def route_rename(function_name: str, new_route_name: str):
 
 @route_app.command("delete")
 def route_delete(function_name: str):
-    """
-    Deletes the route of the function.
-    """
+
     path = get_fn_route_path(function_name)
     if path is not None:
         delete_file_if_exists(path)
