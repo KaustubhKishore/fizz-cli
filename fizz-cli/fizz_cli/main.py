@@ -1,10 +1,14 @@
 import time
 
 import typer
+
+# TODO: These are the bullet imports
 from bullet import Bullet
 from bullet import Input
 from bullet import YesNo
 from bullet import colors
+
+# TODO: -------
 from click import clear
 from rich import print
 
@@ -15,12 +19,12 @@ from .utils import ensure_leading_slash
 from .utils import enumerate_functions
 from .utils import get_fn_route_path
 from .utils import read_yaml_file
+from .utils import rename_fn_in_specs
 from .utils import rename_folder
 from .utils import replace_route
 from .utils import save_yaml_file
 from .utils import styled_bullet
 from .utils import update_shell_scripts
-from .utils import rename_fn_in_specs
 
 app = typer.Typer()
 route_app = typer.Typer(help=f"Manage {bold_blue('routes')} for functions.")
@@ -41,13 +45,45 @@ def new(function_name: str):
     print(f"Creating new function: {function_name} \n")
 
 
+# TODO: Remove all "Bullet" library related imports and implement similar functionality using Typer (already part of the project)
 @app.command()
 @fn_app.command()
 def rename(function_name: str, new_name: str):
     """
     Renames an existing function to a new name.
     """
-    print(f"Renaming {function_name} to {new_name}")
+    folder_mod = YesNo(
+        "Modify folder name? NOTE: bash/bat scripts will also be modified.",
+        default="y",
+    )
+    folder_mod = folder_mod.launch()
+    if folder_mod:
+        new_fn_name = Input(
+            "New function name: ",
+            default="",
+            word_color=colors.foreground["yellow"],
+        )
+        new_fn_name = new_fn_name.launch()
+        success = rename_folder(function_name, new_fn_name)
+
+        if success:
+            print("[:white_check_mark:][block green]Folder renamed.[/block green]")
+        else:
+            print(
+                "[:heavy_exclamation_mark:][block red] Folder name not found for the exact function name.\n"
+                "[:heavy_exclamation_mark:] Default folder naming convention is not being used.[/block red]"
+            )
+
+        success = update_shell_scripts(function_name, new_fn_name)
+        if success:
+            print(f"[block green]sh/bat scripts updated[/block green]")
+        else:
+            print(
+                f":heavy_exclamation_mark:[block red]failed to update sh/bat scripts[/block red]"
+            )
+
+        rename_fn_in_specs(function_name, new_fn_name)
+        print(f"[block green]Function renaming in specs done.[/block green]")
 
 
 @route_app.command("rename")
@@ -132,43 +168,8 @@ def i():
                 elif idx == 1:
                     route_delete(function_name)
                 elif idx == 2:
-                    folder_mod = YesNo(
-                        "Modify folder name? NOTE: bash/bat scripts will also be modified.",
-                        default="y",
-                    )
+                    pass
 
-                    folder_mod = folder_mod.launch()
-                    if folder_mod:
-                        new_fn_name = Input(
-                            "New function name: ",
-                            default="",
-                            word_color=colors.foreground["yellow"],
-                        )
-                        new_fn_name = new_fn_name.launch()
-                        success = rename_folder(function_name, new_fn_name)
-
-                        if success:
-                            print(
-                                "[:white_check_mark:][block green]Folder renamed.[/block green]"
-                            )
-                        else:
-                            print(
-                                "[:heavy_exclamation_mark:][block red] Folder name not found for the exact function name.\n"
-                                "[:heavy_exclamation_mark:] Default folder naming convention is not being used.[/block red]"
-                            )
-
-                        success = update_shell_scripts(function_name, new_fn_name)
-                        if success:
-                            print(f"[block green]sh/bat scripts updated[/block green]")
-                        else:
-                            print(
-                                f":heavy_exclamation_mark:[block red]failed to update sh/bat scripts[/block red]"
-                            )
-
-                        rename_fn_in_specs(function_name, new_fn_name)
-                        print(
-                            f"[block green]Function renaming in specs done.[/block green]"
-                        )
             else:
                 print(
                     ":boom: [bold red]Incorrect Directory![/bold red] [yellow]Navigate to the level where "
