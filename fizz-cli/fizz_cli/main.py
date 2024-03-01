@@ -1,30 +1,23 @@
 import time
-
 import typer
 
-# TODO: These are the bullet imports
-from bullet import Bullet
-from bullet import Input
-from bullet import YesNo
-from bullet import colors
-
-# TODO: -------
 from click import clear
 from rich import print
 
-from .utils import bold_blue
-from .utils import check_fission_directory
-from .utils import delete_file_if_exists
-from .utils import ensure_leading_slash
-from .utils import enumerate_functions
-from .utils import get_fn_route_path
-from .utils import read_yaml_file
-from .utils import rename_fn_in_specs
-from .utils import rename_folder
-from .utils import replace_route
-from .utils import save_yaml_file
-from .utils import styled_bullet
-from .utils import update_shell_scripts
+from .utils import (
+    bold_blue,
+    check_fission_directory,
+    delete_file_if_exists,
+    ensure_leading_slash,
+    enumerate_functions,
+    get_fn_route_path,
+    read_yaml_file,
+    rename_fn_in_specs,
+    rename_folder,
+    replace_route,
+    save_yaml_file,
+    update_shell_scripts,
+)
 
 app = typer.Typer()
 route_app = typer.Typer(help=f"Manage {bold_blue('routes')} for functions.")
@@ -45,45 +38,40 @@ def new(function_name: str):
     print(f"Creating new function: {function_name} \n")
 
 
-# TODO: Remove all "Bullet" library related imports and implement similar functionality using Typer (already part of the project)
 @app.command()
 @fn_app.command()
 def rename(function_name: str, new_name: str):
     """
     Renames an existing function to a new name.
     """
-    folder_mod = YesNo(
+    typer.confirm(
         "Modify folder name? NOTE: bash/bat scripts will also be modified.",
-        default="y",
+        default=True,
+        abort=True,
     )
-    folder_mod = folder_mod.launch()
-    if folder_mod:
-        new_fn_name = Input(
-            "New function name: ",
-            default="",
-            word_color=colors.foreground["yellow"],
+    new_fn_name = typer.prompt(
+        "New function name: ", default="", show_default=False, fg=typer.colors.YELLOW
+    )
+    success = rename_folder(function_name, new_fn_name)
+
+    if success:
+        print("[:white_check_mark:][block green]Folder renamed.[/block green]")
+    else:
+        print(
+            "[:heavy_exclamation_mark:][block red] Folder name not found for the exact function name.\n"
+            "[:heavy_exclamation_mark:] Default folder naming convention is not being used.[/block red]"
         )
-        new_fn_name = new_fn_name.launch()
-        success = rename_folder(function_name, new_fn_name)
 
-        if success:
-            print("[:white_check_mark:][block green]Folder renamed.[/block green]")
-        else:
-            print(
-                "[:heavy_exclamation_mark:][block red] Folder name not found for the exact function name.\n"
-                "[:heavy_exclamation_mark:] Default folder naming convention is not being used.[/block red]"
-            )
+    success = update_shell_scripts(function_name, new_fn_name)
+    if success:
+        print(f"[block green]sh/bat scripts updated[/block green]")
+    else:
+        print(
+            f":heavy_exclamation_mark:[block red]failed to update sh/bat scripts[/block red]"
+        )
 
-        success = update_shell_scripts(function_name, new_fn_name)
-        if success:
-            print(f"[block green]sh/bat scripts updated[/block green]")
-        else:
-            print(
-                f":heavy_exclamation_mark:[block red]failed to update sh/bat scripts[/block red]"
-            )
-
-        rename_fn_in_specs(function_name, new_fn_name)
-        print(f"[block green]Function renaming in specs done.[/block green]")
+    rename_fn_in_specs(function_name, new_fn_name)
+    print(f"[block green]Function renaming in specs done.[/block green]")
 
 
 @route_app.command("rename")
@@ -108,7 +96,6 @@ def route_delete(function_name: str):
     path = get_fn_route_path(function_name)
     if path is not None:
         delete_file_if_exists(path)
-
     else:
         print(
             f"[bold red]Couldn't find route-{function_name}.yaml in the specs directory or the proper "
@@ -117,58 +104,58 @@ def route_delete(function_name: str):
 
 
 @app.command()
+@app.command()
 def i():
     exit_cli = False
     while exit_cli is False:
         clear()
-        new_or_existing = styled_bullet(
-            "[🧰] What would you like to do?",
-            [
-                "Modify Existing Function",
-                "Create New Function",
-                "Initialise Fission",
-            ],
-        )
+        print("[🧰] What would you like to do?")
+        print("1. Modify Existing Function")
+        print("2. Create New Function")
+        print("3. Initialise Fission")
 
-        _, idx = new_or_existing.launch()
+        choice = typer.prompt("Enter the number corresponding to your choice:")
 
-        if idx == 0:
+        if choice == 1:
             exists = check_fission_directory()
 
             if exists:
                 func_list = enumerate_functions()
-                modify_existing: Bullet = styled_bullet(
-                    "Existing Functions: ", func_list
+                function_name = typer.prompt(
+                    f"Existing Functions: {func_list}\nChoose a function to modify:",
+                    type=str,
                 )
-                function_name, _ = modify_existing.launch()
 
                 print(
                     f"[:hammer_and_wrench:] [bold green]{function_name}[/bold green] [bold blue]Modification Options:[/bold blue]"
                 )
-                modification_options = styled_bullet(
-                    "",
-                    [
-                        "Rename Route",
-                        "Delete Route",
-                        "Rename Function",
-                        "Delete Function",
-                    ],
+                print("1. Rename Route")
+                print("2. Delete Route")
+                print("3. Rename Function")
+                print("4. Delete Function")
+
+                idx = typer.prompt(
+                    "Select an option:",
+                    type=int,
                 )
 
-                _, idx = modification_options.launch()
-                if idx == 0:
-                    new_route = Input(
-                        "New route name: ",
+                if idx == 1:
+                    new_route = typer.prompt(
+                        "Enter the new route name:",
                         default="",
-                        word_color=colors.foreground["yellow"],
+                        show_default=False,
+                        fg=typer.colors.YELLOW,
                     )
+                    route_rename(function_name, new_route)
 
-                    res = new_route.launch()
-                    route_rename(function_name, res)
-                elif idx == 1:
-                    route_delete(function_name)
                 elif idx == 2:
-                    pass
+                    route_delete(function_name)
+
+                elif idx == 3:
+                    pass  # Add your logic here for renaming the function
+
+                elif idx == 4:
+                    pass  # Add your logic here for deleting the function
 
             else:
                 print(
@@ -179,3 +166,4 @@ def i():
             typer.echo("New")
 
         time.sleep(2)
+

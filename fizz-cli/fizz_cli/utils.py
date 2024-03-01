@@ -10,8 +10,6 @@ from importlib import resources
 
 import typer
 import yaml
-from bullet import Bullet
-from bullet import colors
 from rich import print
 from rich.progress import Progress
 from rich.progress import SpinnerColumn
@@ -51,20 +49,6 @@ def enumerate_functions():
 
 def bold_blue(data: str):
     return typer.style(data, fg=typer.colors.BLUE, bold=True)
-
-
-def styled_bullet(prompt: str, choices: list[str]):
-    return Bullet(
-        prompt=prompt,
-        choices=choices,
-        bullet=" >",
-        indent=0,
-        margin=2,
-        bullet_color=colors.bright(colors.foreground["blue"]),
-        word_color=colors.foreground["blue"],
-        word_on_switch=colors.foreground["magenta"],
-        return_index=True,
-    )
 
 
 def read_yaml_file(prefix: str, fn_name: str):
@@ -343,3 +327,128 @@ def rename_file(old_file_path, new_file_path):
 
     except Exception:
         return False
+
+
+# Define Typer app
+app = typer.Typer()
+
+
+@app.command()
+def new(function_name: str):
+    """
+    Creates a new function with the given name.
+    """
+    print(f"Creating new function: {function_name} \n")
+
+
+@app.command()
+def rename(function_name: str, new_name: str):
+    """
+    Renames an existing function to a new name.
+    """
+    typer.confirm(
+        "Modify folder name? NOTE: bash/bat scripts will also be modified.",
+        default=True,
+        abort=True,
+    )
+    new_fn_name = typer.prompt(
+        "New function name: ", default="", show_default=False, fg=typer.colors.YELLOW
+    )
+    success = rename_folder(function_name, new_fn_name)
+
+    if success:
+        print("[:white_check_mark:][block green]Folder renamed.[/block green]")
+    else:
+        print(
+            "[:heavy_exclamation_mark:][block red] Folder name not found for the exact function name.\n"
+            "[:heavy_exclamation_mark:] Default folder naming convention is not being used.[/block red]"
+        )
+
+    success = update_shell_scripts(function_name, new_fn_name)
+    if success:
+        print(f"[block green]sh/bat scripts updated[/block green]")
+    else:
+        print(
+            f":heavy_exclamation_mark:[block red]failed to update sh/bat scripts[/block red]"
+        )
+
+    rename_fn_in_specs(function_name, new_fn_name)
+    print(f"[block green]Function renaming in specs done.[/block green]")
+
+
+@app.command()
+def i():
+    exit_cli = False
+    while exit_cli is False:
+        typer.clear()
+        new_or_existing = styled_bullet(
+            "[🧰] What would you like to do?",
+            [
+                "Modify Existing Function",
+                "Create New Function",
+                "Initialise Fission",
+            ],
+        )
+
+        _, idx = new_or_existing.launch()
+
+        if idx == 0:
+            exists = check_fission_directory()
+
+            if exists:
+                func_list = enumerate_functions()
+                modify_existing = styled_bullet(
+                    "Existing Functions: ", func_list
+                )
+                function_name = typer.prompt(
+                    modify_existing.title,
+                    type=str,
+                    default=None,
+                    show_choices=False,
+                )
+
+                print(
+                    f"[:hammer_and_wrench:] [bold green]{function_name}[/bold green] [bold blue]Modification Options:[/bold blue]"
+                )
+                modification_options = styled_bullet(
+                    "",
+                    [
+                        "Rename Route",
+                        "Delete Route",
+                        "Rename Function",
+                        "Delete Function",
+                    ],
+                )
+
+                idx = typer.prompt(
+                    modification_options.title,
+                    type=int,
+                    default=None,
+                    show_choices=False,
+                )
+                if idx == 0:
+                    new_route = typer.prompt(
+                        "New route name: ",
+                        default="",
+                        show_default=False,
+                        fg=typer.colors.YELLOW,
+                    )
+
+                    route_rename(function_name, new_route)
+                elif idx == 1:
+                    route_delete(function_name)
+                elif idx == 2:
+                    pass
+            else:
+                print(
+                    ":boom: [bold red]Incorrect Directory![/bold red] [yellow]Navigate to the level where "
+                    "the specs folder exists.[/yellow]"
+                )
+        else:
+            typer.echo("New")
+
+        time.sleep(2)
+
+
+if __name__ == "__main__":
+    app()
