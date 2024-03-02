@@ -10,8 +10,6 @@ from importlib import resources
 
 import typer
 import yaml
-from bullet import Bullet
-from bullet import colors
 from rich import print
 from rich.progress import Progress
 from rich.progress import SpinnerColumn
@@ -53,20 +51,6 @@ def bold_blue(data: str):
     return typer.style(data, fg=typer.colors.BLUE, bold=True)
 
 
-def styled_bullet(prompt: str, choices: list[str]):
-    return Bullet(
-        prompt=prompt,
-        choices=choices,
-        bullet=" >",
-        indent=0,
-        margin=2,
-        bullet_color=colors.bright(colors.foreground["blue"]),
-        word_color=colors.foreground["blue"],
-        word_on_switch=colors.foreground["magenta"],
-        return_index=True,
-    )
-
-
 def read_yaml_file(prefix: str, fn_name: str):
     try:
         with open(f"{SPECS_DIR}/{prefix}-{fn_name}.yaml", "r") as file:
@@ -97,9 +81,12 @@ def replace_route(yaml_data, new_route):
         # Load the template file as the new base for YAML data
         yaml_data = get_yaml_from_template("route")
         print(
-            "[bold yellow]New spec file is being generated since default naming convention is not "
-            "followed or spec file is corrupt![/bold yellow]"
-            "\n:heavy_exclamation_mark:[bold red]Make sure to modify the HTTP Methods"
+            "[bold yellow]"
+            "New spec file is being generated since default naming convention is not followed or spec file is corrupt!\n"
+            "[/bold yellow]"
+            "[bold red]"
+            ":heavy_exclamation_mark: Make sure to modify the HTTP Methods"
+            "[/bold red]"
         )
 
     if "spec" in yaml_data and "ingressconfig" in yaml_data["spec"]:
@@ -113,10 +100,10 @@ def replace_route(yaml_data, new_route):
 
 def ensure_leading_slash(s):
     trimmed = s.strip()
-    if not trimmed.startswith("/"):
-        return "/" + trimmed
-    else:
+    if trimmed.startswith("/"):
         return trimmed
+    else:
+        return "/" + trimmed
 
 
 def get_yaml_from_template(template_name):
@@ -342,4 +329,25 @@ def rename_file(old_file_path, new_file_path):
         return True
 
     except Exception:
+        return False
+
+
+def delete_function(fn_name: str):
+    try:
+        delete_file_if_exists(os.path.join(SPECS_DIR, f"function-{fn_name}.yaml"))
+
+        delete_file_if_exists(os.path.join(SPECS_DIR, f"route-{fn_name}.yaml"))
+
+        delete_file_if_exists(os.path.join(SPECS_DIR, f"package-{fn_name}.yaml"))
+
+        shutil.rmtree(fn_name)
+
+        print(
+            f"[bold green]Function '{fn_name}' and its associated files have been deleted successfully.[/bold green]"
+        )
+        return True
+    except Exception as e:
+        print(
+            f"[bold red]Error occurred while deleting function '{fn_name}': {e}[/bold red]"
+        )
         return False
