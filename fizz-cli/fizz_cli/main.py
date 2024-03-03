@@ -21,6 +21,7 @@ from .utils import replace_route
 from .utils import save_yaml_file
 from .utils import update_shell_scripts
 from .utils import id_generator
+from .utils import initialise_fission
 
 app = typer.Typer()
 route_app = typer.Typer(help=f"Manage {bold_blue('routes')} for functions.")
@@ -46,9 +47,7 @@ def new(function_name: str):
 def delete(function_name: str):
     deleted = delete_function(function_name)  # Call delete_function
     if deleted:
-        print(
-            f"[bold green]Function '{function_name}' deleted successfully.[/bold green]"
-        )
+        print(f"[bold green]Function '{function_name}' deleted successfully.[/bold green]")
     else:
         print(f"[bold red]Failed to delete function '{function_name}'.[/bold red]")
 
@@ -84,9 +83,7 @@ def rename(function_name: str, new_name: str):
     if success:
         print(f"[block green]sh/bat scripts updated[/block green]")
     else:
-        print(
-            f":heavy_exclamation_mark:[block red]failed to update sh/bat scripts[/block red]"
-        )
+        print(f":heavy_exclamation_mark:[block red]failed to update sh/bat scripts[/block red]")
 
     rename_fn_in_specs(function_name, new_fn_name)
     print(f"[block green]Function renaming in specs done.[/block green]")
@@ -101,9 +98,7 @@ def route_rename(function_name: str, new_route_name: str):
     data = replace_route(data, new_route_name)
     save_yaml_file("route", function_name, data)
 
-    print(
-        f"[bold green]Created or renamed {function_name} route to {ensure_leading_slash(new_route_name)}[/bold green]"
-    )
+    print(f"[bold green]Created or renamed {function_name} route to {ensure_leading_slash(new_route_name)}[/bold green]")
 
 
 @route_app.command("delete")
@@ -156,10 +151,7 @@ def i():
                 type=str,
             )
 
-            print(
-                f"[bold green][:hammer_and_wrench:] {fn_name}[/bold green] "
-                f"[bold blue]Modification Options:[/bold blue]"
-            )
+            print(f"[bold green][:hammer_and_wrench:] {fn_name}[/bold green] " f"[bold blue]Modification Options:[/bold blue]")
 
             print(
                 "[:toolbox:] What would you like to do? \n"
@@ -182,6 +174,9 @@ def i():
 
             elif choice == 3:
                 delete(fn_name)
+        elif choice == 3:
+            initialise_fission()
+            # print("vaibhav")
         else:
             typer.echo("New")
 

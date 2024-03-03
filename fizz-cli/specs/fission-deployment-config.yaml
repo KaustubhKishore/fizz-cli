@@ -4,4 +4,4 @@
 apiVersion: fission.io/v1
 kind: DeploymentConfig
 name: fizz-cli
-uid: ddcc1177-a3d3-4bf4-8ba3-b8e8d0d6d71e
+uid: 2e2a1b99-ac3e-46aa-8fa1-487e90c1addc

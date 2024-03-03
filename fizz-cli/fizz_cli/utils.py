@@ -73,10 +73,7 @@ def replace_route(yaml_data, new_route):
     if (
         not yaml_data
         or "spec" not in yaml_data
-        or (
-            "ingressconfig" not in yaml_data["spec"]
-            and "relativeurl" not in yaml_data["spec"]
-        )
+        or ("ingressconfig" not in yaml_data["spec"] and "relativeurl" not in yaml_data["spec"])
     ):
         # Load the template file as the new base for YAML data
         yaml_data = get_yaml_from_template("route")
@@ -187,9 +184,7 @@ def update_shell_scripts(fn_name, new_fn_name):
                 if platform.system().lower() == "windows":
                     print(f"[block green]Detected windows.[/block green]")
 
-                    progress.add_task(
-                        description="Running win-package.bat...", total=None
-                    )
+                    progress.add_task(description="Running win-package.bat...", total=None)
                     subprocess.run(
                         "./win-package.bat",
                         shell=True,
@@ -197,9 +192,7 @@ def update_shell_scripts(fn_name, new_fn_name):
                         capture_output=False,
                     )
                 else:
-                    progress.add_task(
-                        description="Running lin-package.sh...", total=None
-                    )
+                    progress.add_task(description="Running lin-package.sh...", total=None)
                     subprocess.run(
                         "./lin-package.sh",
                         shell=True,
@@ -208,9 +201,7 @@ def update_shell_scripts(fn_name, new_fn_name):
                     )
 
             except Exception:
-                print(
-                    f"[block red]Error while running scripts. Kindly check permissions.[/block red]"
-                )
+                print(f"[block red]Error while running scripts. Kindly check permissions.[/block red]")
 
         return True
     except Exception:
@@ -276,9 +267,7 @@ def replace_build_cmd(fn_name):
             del config["spec"]["buildcmd"]
 
         # Add or modify the 'initContainers' entry in the second document
-        config["spec"]["initContainers"] = [
-            {"command": ["chmod +x build.sh", "./build.sh"]}
-        ]
+        config["spec"]["initContainers"] = [{"command": ["chmod +x build.sh", "./build.sh"]}]
 
         # Replace the modified document in the list
         docs[1] = config
@@ -342,12 +331,12 @@ def delete_function(fn_name: str):
 
         shutil.rmtree(fn_name)
 
-        print(
-            f"[bold green]Function '{fn_name}' and its associated files have been deleted successfully.[/bold green]"
-        )
+        print(f"[bold green]Function '{fn_name}' and its associated files have been deleted successfully.[/bold green]")
         return True
     except Exception as e:
-        print(
-            f"[bold red]Error occurred while deleting function '{fn_name}': {e}[/bold red]"
-        )
+        print(f"[bold red]Error occurred while deleting function '{fn_name}': {e}[/bold red]")
         return False
+
+
+def initialise_fission():
+    os.system("fission spec init")
