@@ -41,6 +41,9 @@ def new(function_name: str):
 
 @app.command()
 def init():
+    """
+    Initialise fission in the current directory so that fission development can be started
+    """
     print(
         "[bold green]:white_heavy_check_mark:Fission Spec Initialisation Completed.[/bold green]"
     )
@@ -133,6 +136,9 @@ def route_delete(function_name: str):
 
 @app.command()
 def i():
+    """
+    Interactive Mode
+    """
     exit_cli = False
     while exit_cli is False:
         clear()
