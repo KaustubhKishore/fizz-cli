@@ -64,7 +64,7 @@ def delete(function_name: str):
 
 @app.command()
 @fn_app.command()
-def rename(function_name: str, new_name: str):
+def rename(fn_name: str):
     """
     Renames an existing function to a new name.
     """
@@ -77,7 +77,7 @@ def rename(function_name: str, new_name: str):
         "Function Name: ",
         default=bold_blue(f"function{id_generator()}"),
     )
-    success = rename_folder(function_name, new_fn_name)
+    success = rename_folder(fn_name, new_fn_name)
 
     if success:
         print("[block green][:white_check_mark:]Folder renamed.[/block green]")
@@ -89,7 +89,7 @@ def rename(function_name: str, new_name: str):
             "[/block red]"
         )
 
-    success = update_shell_scripts(function_name, new_fn_name)
+    success = update_shell_scripts(fn_name, new_fn_name)
     if success:
         print(f"[block green]sh/bat scripts updated[/block green]")
     else:
@@ -97,7 +97,7 @@ def rename(function_name: str, new_name: str):
             f":heavy_exclamation_mark:[block red]failed to update sh/bat scripts[/block red]"
         )
 
-    rename_fn_in_specs(function_name, new_fn_name)
+    rename_fn_in_specs(fn_name, new_fn_name)
     print(f"[block green]Function renaming in specs done.[/block green]")
 
 
@@ -188,12 +188,15 @@ def i():
 
             elif choice == 2:
                 route_delete(fn_name)
-
             elif choice == 3:
+                rename(fn_name)
+            elif choice == 4:
                 delete(fn_name)
         elif choice == 0:
             init()
         else:
-            typer.echo("New")
+            typer.echo("Invalid Choice!")
+            time.sleep(1)
+            continue
 
         time.sleep(2)
