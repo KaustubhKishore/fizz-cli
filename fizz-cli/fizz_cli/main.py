@@ -1,11 +1,8 @@
 import time
 
-import click
 import typer
-
 from click import clear
 from rich import print
-from rich.prompt import Prompt
 
 from .utils import bold_blue
 from .utils import check_fission_directory
@@ -14,13 +11,14 @@ from .utils import delete_function
 from .utils import ensure_leading_slash
 from .utils import enumerate_functions
 from .utils import get_fn_route_path
+from .utils import id_generator
+from .utils import init_fission
 from .utils import read_yaml_file
 from .utils import rename_fn_in_specs
 from .utils import rename_folder
 from .utils import replace_route
 from .utils import save_yaml_file
 from .utils import update_shell_scripts
-from .utils import id_generator
 
 app = typer.Typer()
 route_app = typer.Typer(help=f"Manage {bold_blue('routes')} for functions.")
@@ -42,9 +40,20 @@ def new(function_name: str):
 
 
 @app.command()
+def init():
+    print(
+        "[bold green]:white_heavy_check_mark:Fission Spec Initialisation Completed.[/bold green]"
+    )
+    init_fission()
+
+
+@app.command()
 @fn_app.command()
 def delete(function_name: str):
-    deleted = delete_function(function_name)  # Call delete_function
+    """
+    Deletes the code folder and the function, route and package specs.
+    """
+    deleted = delete_function(function_name)
     if deleted:
         print(
             f"[bold green]Function '{function_name}' deleted successfully.[/bold green]"
@@ -132,7 +141,7 @@ def i():
             "[:toolbox:] What would you like to do? \n"
             "[:wrench:]  1) Modify Existing Function \n"
             "[:new:]  2) Create New Function \n"
-            "[:green_circle:]  3) Initialise Fission"
+            "[:green_circle:]  0) Initialise Fission"
         )
         choice = typer.prompt("Choice", type=int)
 
@@ -182,6 +191,8 @@ def i():
 
             elif choice == 3:
                 delete(fn_name)
+        elif choice == 0:
+            init()
         else:
             typer.echo("New")
 

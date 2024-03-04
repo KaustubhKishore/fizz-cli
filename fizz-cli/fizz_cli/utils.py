@@ -351,3 +351,12 @@ def delete_function(fn_name: str):
             f"[bold red]Error occurred while deleting function '{fn_name}': {e}[/bold red]"
         )
         return False
+
+
+def init_fission():
+    subprocess.run(
+        f"fission spec init",
+        shell=True,
+        text=False,
+        capture_output=False,
+    )
