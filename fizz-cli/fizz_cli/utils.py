@@ -358,13 +358,47 @@ def delete_function(fn_name: str):
         return False
 
 
+def get_current_environment():
+    """
+    if env exists
+    """
+    if os.path.exists(f"{os.getcwd()}/specs"):
+        files = os.listdir(f"{os.getcwd()}/specs")
+        env_file = [
+            file for file in files if file.endswith(".yaml") and file.startswith("env")
+        ]
+        with open(f"{os.getcwd()}/specs/{env_file[0]}", "r") as file:
+            yaml_content = yaml.safe_load(file)
+
+        environment_name = yaml_content["metadata"]["name"]
+        return environment_name
+    else:
+        return False
+
+
 def init_fission():
-    subprocess.run(
-        f"fission spec init",
-        shell=True,
-        text=False,
-        capture_output=False,
-    )
+    current_environment = get_current_environment()
+    if current_environment:
+        print(f"environment already exists\n" "spec folder already exists\n")
+    else:
+        subprocess.run(
+            f"fission spec init",
+            shell=True,
+            text=False,
+            capture_output=False,
+            check=True,
+        )
+        new_environment = typer.prompt(
+            "Enter New Environment Name", default=f"env-{id_generator()}"
+        )
+        subprocess.run(
+            f"fission env create --name {new_environment} --image fission/python-env:latest --builder fission/python-builder:latest --spec",
+            shell=True,
+            text=False,
+            capture_output=False,
+            check=True,
+        )
+        print(f"[Environment created {new_environment}]")
 
 
 def new_function(folder_name):
