@@ -113,6 +113,13 @@ def get_yaml_from_template(template_name):
     return content
 
 
+def get_content_from_main(filename):
+    with resources.open_text("fizz_cli.templates", f"{filename}.py") as file:
+        content = file.read()
+
+    return content
+
+
 def get_fn_route_path(fn_name: str):
     file_name = f"route-{fn_name}.yaml"
     file_path = os.path.join(SPECS_DIR, file_name)
@@ -177,44 +184,42 @@ def update_shell_scripts(fn_name, new_fn_name):
         bat_content = zip_pattern.sub(f"{new_fn_name}.zip", bat_content)
         with open(BAT_FILE, "w") as file:
             file.write(bat_content)
-
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            transient=True,
-        ) as progress:
-            try:
-                if platform.system().lower() == "windows":
-                    print(f"[block green]Detected windows.[/block green]")
-
-                    progress.add_task(
-                        description="Running win-package.bat...", total=None
-                    )
-                    subprocess.run(
-                        "./win-package.bat",
-                        shell=True,
-                        text=False,
-                        capture_output=False,
-                    )
-                else:
-                    progress.add_task(
-                        description="Running lin-package.sh...", total=None
-                    )
-                    subprocess.run(
-                        "./lin-package.sh",
-                        shell=True,
-                        text=False,
-                        capture_output=False,
-                    )
-
-            except Exception:
-                print(
-                    f"[block red]Error while running scripts. Kindly check permissions.[/block red]"
-                )
-
+        exec_plat_package_script()
         return True
     except Exception:
         return False
+
+
+def exec_plat_package_script():
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True,
+    ) as progress:
+        try:
+            if platform.system().lower() == "windows":
+                print(f"[block green]Detected windows.[/block green]")
+                progress.add_task(description="Running win-package.bat...", total=None)
+                subprocess.run(
+                    "win-package.bat",
+                    shell=True,
+                    text=False,
+                    capture_output=False,
+                )
+            else:
+                progress.add_task(description="Running lin-package.sh...", total=None)
+                subprocess.run(
+                    "./lin-package.sh",
+                    shell=True,
+                    text=False,
+                    capture_output=False,
+                )
+
+        except Exception:
+            print(
+                f"[block red]Error while running scripts. Kindly check permissions.[/block red]"
+            )
+    return True
 
 
 def get_environment_from_package_config(fn_name):
@@ -360,3 +365,58 @@ def init_fission():
         text=False,
         capture_output=False,
     )
+
+
+def new_function(folder_name):
+    new_folder_path = os.path.join(os.getcwd(), folder_name)
+    os.makedirs(new_folder_path, exist_ok=True)
+    files_to_create = ["main.py", "build.sh", "__init__.py", "requirements.txt"]
+
+    for filename in files_to_create:
+        file_path = os.path.join(new_folder_path, filename)
+        with open(file_path, "w") as file:
+            if filename == "build.sh":
+                file.write(
+                    "#!/bin/sh \n"
+                    "pip3 install -r ${SRC_PKG}/requirements.txt -t ${SRC_PKG} && cp -r ${SRC_PKG} ${DEPLOY_PKG}"
+                )
+            elif filename == "main.py":
+                file.write(f"{get_content_from_main('main')}")
+
+    dir_file_names = os.listdir()
+    lin_package = "lin-package.sh" in dir_file_names
+    file_path = os.path.join(os.getcwd(), "lin-package.sh")
+    if lin_package:
+        with open(file_path, "a") as file:
+            file.write(
+                f"pushd {folder_name}\n"
+                f"zip -q -r ../{folder_name}.zip *\n"
+                "popd\n\n"
+            )
+    elif not lin_package:
+        with open(file_path, "w") as file:
+            file.write(
+                f"pushd {folder_name}\n"
+                f"zip -q -r ../{folder_name}.zip *\n"
+                "popd\n\n"
+            )
+
+    win_package = "win-package.bat" in dir_file_names
+    win_package_path = os.path.join(os.getcwd(), "win-package.bat")
+
+    if win_package:
+        with open(win_package_path, "a") as file:
+            file.write(
+                f"pushd {folder_name}\n"
+                f'powershell -Command "Compress-Archive -Path * -DestinationPath ..\{folder_name}.zip" -Force\n'
+                "popd\n\n"
+            )
+    elif not win_package:
+        with open(win_package_path, "w") as file:
+            file.write(
+                f"@echo off\n\n"
+                f"pushd {folder_name}\n"
+                f'powershell -Command "Compress-Archive -Path * -DestinationPath ..\{folder_name}.zip" -Force\n'
+                "popd\n\n"
+            )
+    return True

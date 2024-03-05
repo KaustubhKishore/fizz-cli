@@ -1,6 +1,8 @@
+import os
+import subprocess
 import time
-
 import typer
+
 from click import clear
 from rich import print
 
@@ -19,6 +21,9 @@ from .utils import rename_folder
 from .utils import replace_route
 from .utils import save_yaml_file
 from .utils import update_shell_scripts
+from .utils import new_function
+from .utils import exec_plat_package_script
+
 
 app = typer.Typer()
 route_app = typer.Typer(help=f"Manage {bold_blue('routes')} for functions.")
@@ -37,6 +42,28 @@ def new(function_name: str):
     Creates a new function with the given name.
     """
     print(f"Creating new function: {function_name} \n")
+    created = new_function(function_name)
+    if created:
+        executed = exec_plat_package_script()
+        if executed:
+            subprocess.run(
+                f'fission package create --sourcearchive {function_name}.zip --env ipl-2024 --buildcmd "./build.sh"  --name {function_name} --spec',
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            subprocess.run(
+                f'fission fn create --name {function_name} --pkg {function_name} --entrypoint "main.main" --env=ipl-2024 --spec',
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            subprocess.run(
+                f"fission route create --name {function_name} --method GET --method POST --url /{function_name} --function {function_name} --spec",
+                capture_output=True,
+                text=True,
+                check=True,
+            )
 
 
 @app.command()
@@ -142,12 +169,11 @@ def i():
     exit_cli = False
     while exit_cli is False:
         clear()
-
         print(
             "[:toolbox:] What would you like to do? \n"
             "[:wrench:]  1) Modify Existing Function \n"
             "[:new:]  2) Create New Function \n"
-            "[:green_circle:]  0) Initialise Fission"
+            "[:green_square:] 0) Initialise Fission"
         )
         choice = typer.prompt("Choice", type=int)
 
@@ -200,9 +226,12 @@ def i():
                 delete(fn_name)
         elif choice == 0:
             init()
+        elif choice == 2:
+            folder_name = typer.prompt("Enter the new function name")
+            new(folder_name)
         else:
             typer.echo("Invalid Choice!")
             time.sleep(1)
             continue
 
-        time.sleep(2)
+        time.sleep(5)
