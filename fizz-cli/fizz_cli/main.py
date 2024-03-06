@@ -1,3 +1,4 @@
+import subprocess
 import time
 
 import typer
@@ -10,9 +11,11 @@ from .utils import delete_file_if_exists
 from .utils import delete_function
 from .utils import ensure_leading_slash
 from .utils import enumerate_functions
+from .utils import exec_package_script
 from .utils import get_fn_route_path
 from .utils import id_generator
 from .utils import init_fission
+from .utils import create_new_fn_spec_and_boilerplate
 from .utils import read_yaml_file
 from .utils import rename_fn_in_specs
 from .utils import rename_folder
@@ -37,6 +40,28 @@ def new(function_name: str):
     Creates a new function with the given name.
     """
     print(f"Creating new function: {function_name} \n")
+    created = create_new_fn_spec_and_boilerplate(function_name)
+    if created:
+        executed = exec_package_script()
+        if executed:
+            subprocess.run(
+                f'fission package create --sourcearchive {function_name}.zip --env ipl-2024 --buildcmd "./build.sh"  --name {function_name} --spec',
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            subprocess.run(
+                f'fission fn create --name {function_name} --pkg {function_name} --entrypoint "main.main" --env=ipl-2024 --spec',
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            subprocess.run(
+                f"fission route create --name {function_name} --method GET --method POST --url /{function_name} --function {function_name} --spec",
+                capture_output=True,
+                text=True,
+                check=True,
+            )
 
 
 @app.command()
@@ -142,12 +167,11 @@ def i():
     exit_cli = False
     while exit_cli is False:
         clear()
-
         print(
             "[:toolbox:] What would you like to do? \n"
-            "[:wrench:]  1) Modify Existing Function \n"
-            "[:new:]  2) Create New Function \n"
-            "[:green_circle:]  0) Initialise Fission"
+            "[:wrench:]\t1) Modify Existing Function \n"
+            "[:new:]\t2) Create New Function \n"
+            "[:green_square:]\t0) Initialise Fission"
         )
         choice = typer.prompt("Choice", type=int)
 
@@ -178,10 +202,10 @@ def i():
 
             print(
                 "[:toolbox:] What would you like to do? \n"
-                ":pencil:  1) Rename Route\n"
-                ":skull:  2) Delete Route\n"
-                ":spiral_notepad:  3) Rename Function\n"
-                ":cross_mark:  4) Delete Function"
+                ":pencil:\t1) Rename Route\n"
+                ":skull:\t2) Delete Route\n"
+                ":spiral_notepad:\t3) Rename Function\n"
+                ":cross_mark:\t4) Delete Function"
             )
             choice = typer.prompt("Choice", type=int)
 
@@ -198,6 +222,9 @@ def i():
                 rename(fn_name)
             elif choice == 4:
                 delete(fn_name)
+        elif choice == 2:
+            folder_name = typer.prompt("Enter the new function name")
+            new(folder_name)
         elif choice == 0:
             init()
         else:
@@ -205,4 +232,4 @@ def i():
             time.sleep(1)
             continue
 
-        time.sleep(2)
+        time.sleep(5)
