@@ -2,8 +2,11 @@ import subprocess
 import time
 
 import typer
+
 from click import clear
 from rich import print
+from rich.table import Table
+from rich.console import Console
 
 from .utils import bold_blue
 from .utils import check_fission_directory
@@ -72,7 +75,7 @@ def init():
     Initialise fission in the current directory so that fission development can be started
     """
     print(
-        "[bold green]:white_heavy_check_mark:Fission Spec Initialisation Completed.[/bold green]"
+        "[bold green]:white_heavy_check_mark:  Fission Spec Initialisation Completed.[/bold green]"
     )
     init_fission()
 
@@ -170,10 +173,10 @@ def i():
     while exit_cli is False:
         clear()
         print(
-            "[:toolbox:] What would you like to do? \n"
-            "[:wrench:]\t1) Modify Existing Function \n"
-            "[:new:]\t2) Create New Function \n"
-            "[:green_square:]\t0) Initialise Fission"
+            ":toolbox:\t What would you like to do? \n"
+            ":wrench:\t 1) Modify Existing Function \n"
+            ":new:\t 2) Create New Function \n"
+            ":green_square:\t0) Initialise Fission"
         )
         choice = typer.prompt("Choice", type=int)
 
@@ -192,22 +195,29 @@ def i():
                 continue
 
             func_list = enumerate_functions()
-            fn_name = typer.prompt(
-                f"Existing Functions: {func_list}\nChoose a function to modify:",
-                type=str,
+            console = Console()
+            table = Table(title="Function List")
+            table.add_column("Index", justify="center", style="cyan")
+            table.add_column("Function Name", justify="center", style="magenta")
+            for index, func in enumerate(func_list):
+                table.add_row(str(index), func)
+            console.print(table)
+            fn_index = typer.prompt(
+                f"Existing Functions: {func_list}\nChoose a index to modify function:",
+                type=int,
             )
 
             print(
-                f"[bold green][:hammer_and_wrench:] {fn_name}[/bold green] "
+                f"[bold green]:hammer_and_wrench:      {func_list[fn_index]}[/bold green] "
                 f"[bold blue]Modification Options:[/bold blue]"
             )
 
             print(
-                "[:toolbox:] What would you like to do? \n"
-                ":pencil:\t1) Rename Route\n"
-                ":skull:\t2) Delete Route\n"
-                ":spiral_notepad:\t3) Rename Function\n"
-                ":cross_mark:\t4) Delete Function"
+                ":toolbox:      What would you like to do? \n"
+                ":pencil:\t1)Rename Route\n"
+                ":skull:\t2)Delete Route\n"
+                ":spiral_notepad:     3)Rename Function\n"
+                ":negative_squared_cross_mark:       4)Delete Function"
             )
             choice = typer.prompt("Choice", type=int)
 
@@ -216,14 +226,14 @@ def i():
                     bold_blue("Enter the new route name"),
                     show_default=False,
                 )
-                route_rename(fn_name, new_route)
+                route_rename(func_list[fn_index], new_route)
 
             elif choice == 2:
-                route_delete(fn_name)
+                route_delete(func_list[fn_index])
             elif choice == 3:
-                rename(fn_name)
+                rename(func_list[fn_index])
             elif choice == 4:
-                delete(fn_name)
+                delete(func_list[fn_index])
         elif choice == 2:
             folder_name = typer.prompt("Enter the new function name")
             new(folder_name)
