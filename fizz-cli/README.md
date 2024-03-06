@@ -1,7 +1,22 @@
 # Fizz CLI
 
-**Usage**:
+```
+ ________  __                     
+|        \|  \                    
+| $$$$$$$$ \$$ ________  ________ 
+| $$__    |  \|        \|        \
+| $$  \   | $$ \$$$$$$$$ \$$$$$$$$
+| $$$$$   | $$  /    $$   /    $$ 
+| $$      | $$ /  $$$$_  /  $$$$_ 
+| $$      | $$|  $$    \|  $$    \
+ \$$       \$$ \$$$$$$$$ \$$$$$$$$
+                                  
+```                                  
+                                  
 
+Fission CLI wrapper for easy project management. 
+
+## Usage
 ```console
 $ [OPTIONS] COMMAND [ARGS]...
 ```
@@ -233,4 +248,3 @@ $ route rename [OPTIONS] FUNCTION_NAME NEW_ROUTE_NAME
 **Options**:
 
 * `--help`: Show this message and exit.
-
