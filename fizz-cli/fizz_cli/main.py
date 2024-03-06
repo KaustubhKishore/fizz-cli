@@ -1,8 +1,7 @@
-import os
 import subprocess
 import time
-import typer
 
+import typer
 from click import clear
 from rich import print
 
@@ -12,18 +11,17 @@ from .utils import delete_file_if_exists
 from .utils import delete_function
 from .utils import ensure_leading_slash
 from .utils import enumerate_functions
+from .utils import exec_package_script
 from .utils import get_fn_route_path
 from .utils import id_generator
 from .utils import init_fission
+from .utils import create_new_fn_spec_and_boilerplate
 from .utils import read_yaml_file
 from .utils import rename_fn_in_specs
 from .utils import rename_folder
 from .utils import replace_route
 from .utils import save_yaml_file
 from .utils import update_shell_scripts
-from .utils import new_function
-from .utils import exec_plat_package_script
-
 
 app = typer.Typer()
 route_app = typer.Typer(help=f"Manage {bold_blue('routes')} for functions.")
@@ -42,9 +40,9 @@ def new(function_name: str):
     Creates a new function with the given name.
     """
     print(f"Creating new function: {function_name} \n")
-    created = new_function(function_name)
+    created = create_new_fn_spec_and_boilerplate(function_name)
     if created:
-        executed = exec_plat_package_script()
+        executed = exec_package_script()
         if executed:
             subprocess.run(
                 f'fission package create --sourcearchive {function_name}.zip --env ipl-2024 --buildcmd "./build.sh"  --name {function_name} --spec',
@@ -171,9 +169,9 @@ def i():
         clear()
         print(
             "[:toolbox:] What would you like to do? \n"
-            "[:wrench:]  1) Modify Existing Function \n"
-            "[:new:]  2) Create New Function \n"
-            "[:green_square:] 0) Initialise Fission"
+            "[:wrench:]\t1) Modify Existing Function \n"
+            "[:new:]\t2) Create New Function \n"
+            "[:green_square:]\t0) Initialise Fission"
         )
         choice = typer.prompt("Choice", type=int)
 
@@ -204,10 +202,10 @@ def i():
 
             print(
                 "[:toolbox:] What would you like to do? \n"
-                ":pencil:  1) Rename Route\n"
-                ":skull:  2) Delete Route\n"
-                ":spiral_notepad:  3) Rename Function\n"
-                ":cross_mark:  4) Delete Function"
+                ":pencil:\t1) Rename Route\n"
+                ":skull:\t2) Delete Route\n"
+                ":spiral_notepad:\t3) Rename Function\n"
+                ":cross_mark:\t4) Delete Function"
             )
             choice = typer.prompt("Choice", type=int)
 
@@ -224,11 +222,11 @@ def i():
                 rename(fn_name)
             elif choice == 4:
                 delete(fn_name)
-        elif choice == 0:
-            init()
         elif choice == 2:
             folder_name = typer.prompt("Enter the new function name")
             new(folder_name)
+        elif choice == 0:
+            init()
         else:
             typer.echo("Invalid Choice!")
             time.sleep(1)

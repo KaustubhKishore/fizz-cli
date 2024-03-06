@@ -106,15 +106,15 @@ def ensure_leading_slash(s):
         return "/" + trimmed
 
 
-def get_yaml_from_template(template_name):
+def get_yaml_from_template(template_name: str):
     with resources.open_text("fizz_cli.templates", f"{template_name}.yaml") as file:
         content = yaml.safe_load(file)
 
     return content
 
 
-def get_content_from_main(filename):
-    with resources.open_text("fizz_cli.templates", f"{filename}.py") as file:
+def get_content_from_template(filename: str, extension: str):
+    with resources.open_text("fizz_cli.templates", f"{filename}.{extension}") as file:
         content = file.read()
 
     return content
@@ -130,15 +130,12 @@ def get_fn_route_path(fn_name: str):
         return None
 
 
-def delete_file_if_exists(file_path):
+def delete_file_if_exists(file_path: str):
     try:
-        # Check if the file exists
         if os.path.exists(file_path):
-            # Delete the file
             os.remove(file_path)
             print(f"[bold green]The file {file_path} has been deleted.[/bold green]")
         else:
-            # The file does not exist, so do nothing
             print(f"[bold red]The file {file_path} does not exist.[/bold red]")
     except OSError as e:
         print(f"[bold red]Error: {e.strerror}, filename: {e.filename}[/bold red]")
@@ -149,8 +146,8 @@ def rename_folder(current_fn, new_fn):
     Renames a folder from current_folder_path to new_folder_path.
 
     Parameters:
-        current_folder_path (str): The current path to the folder.
-        new_folder_path (str): The new path or new name for the folder.
+        current_fn (str): Name of the function (corresponding to which a folder is expected).
+        new_fn (str): The new name of the function folder.
 
     Returns:
         bool: True if the folder was successfully renamed, False otherwise.
@@ -184,13 +181,13 @@ def update_shell_scripts(fn_name, new_fn_name):
         bat_content = zip_pattern.sub(f"{new_fn_name}.zip", bat_content)
         with open(BAT_FILE, "w") as file:
             file.write(bat_content)
-        exec_plat_package_script()
+        exec_package_script()
         return True
     except Exception:
         return False
 
 
-def exec_plat_package_script():
+def exec_package_script():
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -394,7 +391,10 @@ def init_fission():
             "Enter New Environment Name", default=f"env-{id_generator()}"
         )
         subprocess.run(
-            f"fission env create --name {new_environment} --image fission/python-env:latest --builder fission/python-builder:latest --spec",
+            f"fission env create "
+            f"--name {new_environment} "
+            f"--image fission/python-env-3.10:latest "
+            f"--builder fission/python-builder-3.10:latest --spec",
             shell=True,
             text=False,
             capture_output=False,
@@ -403,7 +403,7 @@ def init_fission():
         print(f"[Environment created {new_environment}]")
 
 
-def new_function(folder_name):
+def create_new_fn_spec_and_boilerplate(folder_name):
     new_folder_path = os.path.join(os.getcwd(), folder_name)
     os.makedirs(new_folder_path, exist_ok=True)
     files_to_create = ["main.py", "build.sh", "__init__.py", "requirements.txt"]
@@ -417,7 +417,7 @@ def new_function(folder_name):
                     "pip3 install -r ${SRC_PKG}/requirements.txt -t ${SRC_PKG} && cp -r ${SRC_PKG} ${DEPLOY_PKG}"
                 )
             elif filename == "main.py":
-                file.write(f"{get_content_from_main('main')}")
+                file.write(f"{get_content_from_template('main', 'py')}")
 
     dir_file_names = os.listdir()
     lin_package = "lin-package.sh" in dir_file_names
@@ -425,16 +425,16 @@ def new_function(folder_name):
     if lin_package:
         with open(file_path, "a") as file:
             file.write(
-                f"pushd {folder_name}\n"
+                f"\npushd {folder_name}\n"
                 f"zip -q -r ../{folder_name}.zip *\n"
-                "popd\n\n"
+                "popd\n"
             )
     elif not lin_package:
         with open(file_path, "w") as file:
             file.write(
-                f"pushd {folder_name}\n"
+                f"\npushd {folder_name}\n"
                 f"zip -q -r ../{folder_name}.zip *\n"
-                "popd\n\n"
+                "popd\n"
             )
 
     win_package = "win-package.bat" in dir_file_names
@@ -443,16 +443,16 @@ def new_function(folder_name):
     if win_package:
         with open(win_package_path, "a") as file:
             file.write(
-                f"pushd {folder_name}\n"
-                f'powershell -Command "Compress-Archive -Path * -DestinationPath ..\{folder_name}.zip" -Force\n'
-                "popd\n\n"
+                f"\npushd {folder_name}\n"
+                f'powershell -Command "Compress-Archive -Path * -DestinationPath ..\\{folder_name}.zip" -Force\n'
+                "popd\n"
             )
     elif not win_package:
         with open(win_package_path, "w") as file:
             file.write(
                 f"@echo off\n\n"
                 f"pushd {folder_name}\n"
-                f'powershell -Command "Compress-Archive -Path * -DestinationPath ..\{folder_name}.zip" -Force\n'
-                "popd\n\n"
+                f'powershell -Command "Compress-Archive -Path * -DestinationPath ..\\{folder_name}.zip" -Force\n'
+                "popd\n"
             )
     return True
