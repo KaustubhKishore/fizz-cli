@@ -195,7 +195,7 @@ def exec_package_script():
     ) as progress:
         try:
             if platform.system().lower() == "windows":
-                print(f"[block green]Detected windows.[/block green]")
+                print(f"[bold green]Detected windows.[/bold green]")
                 progress.add_task(description="Running win-package.bat...", total=None)
                 subprocess.run(
                     "win-package.bat",
@@ -214,7 +214,7 @@ def exec_package_script():
 
         except Exception:
             print(
-                f"[block red]Error while running scripts. Kindly check permissions.[/block red]"
+                f"[bold red]Error while running scripts. Kindly check permissions.[/bold red]"
             )
     return True
 
@@ -379,8 +379,8 @@ def init_fission():
     current_environment = get_current_environment()
     if current_environment:
         print(
-            f"[block red]environment already exists\n"
-            "spec folder already exists\n[/block red]"
+            f"[bold red]environment already exists\n"
+            "spec folder already exists\n[/bold red]"
         )
     else:
         subprocess.run(

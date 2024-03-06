@@ -110,25 +110,25 @@ def rename(fn_name: str):
     success = rename_folder(fn_name, new_fn_name)
 
     if success:
-        print("[block green][:white_check_mark:]Folder renamed.[/block green]")
+        print("[bold green][:white_check_mark:]Folder renamed.[/bold green]")
     else:
         print(
-            "[block red]"
+            "[bold red]"
             "[:heavy_exclamation_mark:] Folder name not found for the exact function name.\n"
             "[:heavy_exclamation_mark:] Default folder naming convention is not being used."
-            "[/block red]"
+            "[/bold red]"
         )
 
     success = update_shell_scripts(fn_name, new_fn_name)
     if success:
-        print(f"[block green]sh/bat scripts updated[/block green]")
+        print(f"[bold green]sh/bat scripts updated[/bold green]")
     else:
         print(
-            f":heavy_exclamation_mark:[block red]failed to update sh/bat scripts[/block red]"
+            f":heavy_exclamation_mark:[bold red]failed to update sh/bat scripts[/bold red]"
         )
 
     rename_fn_in_specs(fn_name, new_fn_name)
-    print(f"[block green]Function renaming in specs done.[/block green]")
+    print(f"[bold green]Function renaming in specs done.[/bold green]")
 
 
 @route_app.command("rename")
