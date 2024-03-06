@@ -345,6 +345,8 @@ def delete_function(fn_name: str):
 
         delete_file_if_exists(os.path.join(SPECS_DIR, f"package-{fn_name}.yaml"))
 
+        delete_file_if_exists(os.path.join(os.getcwd(), f"{fn_name}.zip"))
+
         shutil.rmtree(fn_name)
 
         print(
