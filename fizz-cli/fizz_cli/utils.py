@@ -456,3 +456,32 @@ def create_new_fn_spec_and_boilerplate(folder_name):
                 "popd\n"
             )
     return True
+
+
+def specs_apply():
+    subprocess.run(
+        f"fission spec apply",
+        shell=True,
+        text=False,
+        capture_output=False,
+        check=True,
+    )
+    print(f"[bold green]specs applied successfully[/bold green]")
+
+
+def destroy():
+    subprocess.run(
+        f"fission spec destroy",
+        shell=True,
+        text=False,
+        capture_output=False,
+        check=True,
+    )
+    subprocess.run(
+        f"fission spec destroy --force",
+        shell=True,
+        text=False,
+        capture_output=False,
+        check=True,
+    )
+    print(f"[bold green]Destroy Successfully[/bold green]")

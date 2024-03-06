@@ -26,6 +26,8 @@ from .utils import replace_route
 from .utils import save_yaml_file
 from .utils import update_shell_scripts
 from .utils import get_current_environment
+from .utils import specs_apply
+from .utils import destroy
 
 app = typer.Typer()
 route_app = typer.Typer(help=f"Manage {bold_blue('routes')} for functions.")
@@ -173,10 +175,12 @@ def i():
     while exit_cli is False:
         clear()
         print(
-            ":toolbox:\t What would you like to do? \n"
-            ":wrench:\t 1) Modify Existing Function \n"
-            ":new:\t 2) Create New Function \n"
-            ":green_square:\t0) Initialise Fission"
+            ":toolbox:  What would you like to do? \n"
+            ":wrench:\t1) Modify Existing Function \n"
+            ":new:\t2) Create New Function \n"
+            ":grinning_face:\t3) Create Deployment \n"
+            ":grimacing_face:\t4) Destroy Deployment\n"
+            ":bulb:\t0) Initialise Fission\n"
         )
         choice = typer.prompt("Choice", type=int)
 
@@ -239,6 +243,10 @@ def i():
             new(folder_name)
         elif choice == 0:
             init()
+        elif choice == 3:
+            specs_apply()
+        elif choice == 4:
+            destroy()
         else:
             typer.echo("Invalid Choice!")
             time.sleep(1)
