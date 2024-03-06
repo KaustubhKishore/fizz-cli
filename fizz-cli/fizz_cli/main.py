@@ -225,12 +225,12 @@ def i():
             elif choice == 4:
                 delete(fn_name)
         elif choice == 2:
-            folder_name = typer.prompt("Enter the new function name")
+            folder_name = typer.prompt(bold_blue("Enter the new function name"))
             new(folder_name)
         elif choice == 0:
             init()
         else:
-            typer.echo("Invalid Choice!")
+            print(":boom::skull:[bold red]Invalid Choice![/bold red]")
             time.sleep(1)
             continue
 
