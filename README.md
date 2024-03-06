@@ -12,7 +12,41 @@
  \$$       \$$ \$$$$$$$$ \$$$$$$$$
                                   
 ```                                  
-                                  
+         
+### Expected directory structure                         
+```
+ |-function1
+   |-requirements.txt
+   |-__init__.py
+   |-build.sh
+   |-lib
+   | |-some-library.tar.gz
+   | |-__init__.py
+   |-main.py
+ |-function2
+   |-requirements.txt
+   |-__init__.py
+   |-build.sh
+   |-main.py
+ |-specs
+   |-fission-deployment-config.yaml
+   |-function-function1.yaml
+   |-function-function2.yaml
+   |-package-function1.yaml
+   |-package-function2.yaml
+   |-README
+   |-route-function1.yaml
+   |-route-function2.yaml
+   |-env-somenv.yaml
+ |-win-package.bat
+ |-lin-package.sh
+ |-function1.zip
+ |-function2.zip
+ 
+ 
+```
+
+
 
 Fission CLI wrapper for easy project management. 
 
