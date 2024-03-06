@@ -378,7 +378,10 @@ def get_current_environment():
 def init_fission():
     current_environment = get_current_environment()
     if current_environment:
-        print(f"environment already exists\n" "spec folder already exists\n")
+        print(
+            f"[block red]environment already exists\n"
+            "spec folder already exists\n[/block red]"
+        )
     else:
         subprocess.run(
             f"fission spec init",
@@ -391,10 +394,7 @@ def init_fission():
             "Enter New Environment Name", default=f"env-{id_generator()}"
         )
         subprocess.run(
-            f"fission env create "
-            f"--name {new_environment} "
-            f"--image fission/python-env-3.10:latest "
-            f"--builder fission/python-builder-3.10:latest --spec",
+            f"fission env create --name {new_environment} --image fission/python-env-3.10:latest --builder fission/python-builder-3.10:latest --spec",
             shell=True,
             text=False,
             capture_output=False,

@@ -22,6 +22,7 @@ from .utils import rename_folder
 from .utils import replace_route
 from .utils import save_yaml_file
 from .utils import update_shell_scripts
+from .utils import get_current_environment
 
 app = typer.Typer()
 route_app = typer.Typer(help=f"Manage {bold_blue('routes')} for functions.")
@@ -41,11 +42,12 @@ def new(function_name: str):
     """
     print(f"Creating new function: {function_name} \n")
     created = create_new_fn_spec_and_boilerplate(function_name)
+    env = get_current_environment()
     if created:
         executed = exec_package_script()
         if executed:
             subprocess.run(
-                f'fission package create --sourcearchive {function_name}.zip --env ipl-2024 --buildcmd "./build.sh"  --name {function_name} --spec',
+                f'fission package create --sourcearchive {function_name}.zip --env {env} --buildcmd "./build.sh"  --name {function_name} --spec',
                 shell=True,
                 text=False,
                 capture_output=False,
