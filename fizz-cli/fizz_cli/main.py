@@ -7,6 +7,7 @@ from rich import print
 
 from .utils import bold_blue
 from .utils import check_fission_directory
+from .utils import create_new_fn_spec_and_boilerplate
 from .utils import delete_file_if_exists
 from .utils import delete_function
 from .utils import ensure_leading_slash
@@ -15,7 +16,6 @@ from .utils import exec_package_script
 from .utils import get_fn_route_path
 from .utils import id_generator
 from .utils import init_fission
-from .utils import create_new_fn_spec_and_boilerplate
 from .utils import read_yaml_file
 from .utils import rename_fn_in_specs
 from .utils import rename_folder
@@ -46,21 +46,21 @@ def new(function_name: str):
         if executed:
             subprocess.run(
                 f'fission package create --sourcearchive {function_name}.zip --env ipl-2024 --buildcmd "./build.sh"  --name {function_name} --spec',
-                capture_output=True,
-                text=True,
-                check=True,
+                shell=True,
+                text=False,
+                capture_output=False,
             )
             subprocess.run(
                 f'fission fn create --name {function_name} --pkg {function_name} --entrypoint "main.main" --env=ipl-2024 --spec',
-                capture_output=True,
-                text=True,
-                check=True,
+                shell=True,
+                text=False,
+                capture_output=False,
             )
             subprocess.run(
                 f"fission route create --name {function_name} --method GET --method POST --url /{function_name} --function {function_name} --spec",
-                capture_output=True,
-                text=True,
-                check=True,
+                shell=True,
+                text=False,
+                capture_output=False,
             )
 
 
